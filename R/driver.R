@@ -1,13 +1,16 @@
 #select da, bui for this job
 require(xts)
-source("src.R")
+#source("R/src.R")
 require(aabd)
+require(aa0)
+require(pcalib)
+require(aautil)
+source("R/aaxtslib.R")
+
 #x <- as.xts(getbdh("PX_LAST_TTL"))
 root.global <- paste0(aabd::bbdir(),"/") #"../BBnew/" 
-#bui.global <- commonbui("BDH")
 bui.global <- buiindir(paste0(root.global,"BDH/RAW/BEST_TARGET_PRICE/TFU"))[1:2]
 da.global <- commonda(patt="CUR_MKT_CAP_TFU.RData")
-#daw.global <- commonda(n="001",patt="^x07")
 daw.global <- as.Date(intersect(as.character(da.global),getca()))
 
 #step 100 - range------------------------------
