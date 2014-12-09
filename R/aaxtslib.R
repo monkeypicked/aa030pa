@@ -1,8 +1,16 @@
+.onLoad <- function(libname, pkgname) {
+#   .jinit()
+#   conn<<-blpConnect()
+  options("stringsAsFactors"=FALSE)
+}
+
+
 # da <- as.Date(sort(intersect(index(x),index(x0))))
 # bui <- intersect(colnames(x),colnames(x0))
 # x <- getbdh("EQY_WEIGHTED_AVG_PX_TFU",ty="z")[da,bui]
 # x0 <- getbdh("PX_LAST_TFU",ty="z")[da,bui]
-source("c:/users/bloomberg/rsql/00lib.r")
+
+#source("c:/users/bloomberg/rsql/00lib.r")
 
 
 dern <- function(root=root.global,n="001",type=c("BDH","BDP")) {
@@ -51,6 +59,41 @@ commonda <- function(joinfun=intersect,nn="000",patt=".?") {
   as.Date(Reduce(joinfun,ll[0<lapply(ll,length)]))
 }
 
+#' Select identifiers (bui) and dates
+#'
+#' Creates directories
+#' @param x zoo used to check validity of da, bui
+#' @param da dates
+#' @param bui unique identifiers
+#' @keywords generic panel
+#' @name f0100
+NULL
+#' @rdname f0100 
+x0100BTP_TFU  <- function() {f0100select(getstep("BEST_TARGET_PRICE_TFU",n="000"))}
+#' @rdname f0100 
+x0100PL_TFU   <- function() {f0100select(getstep("PX_LAST_TFU",n="000"))}
+#' @rdname f0100 
+x0100PL_TTU   <- function() {f0100select(getstep("PX_LAST_TTU",n="000"))}
+#' @rdname f0100 
+x0100PL_TTL   <- function() {f0100select(getstep("PX_LAST_TTL",n="000"))}
+#' @rdname f0100 
+x0100EWAP_TTU <- function() {f0100select(getstep("EQY_WEIGHTED_AVG_PX_TTU",n="000"))}
+#' @rdname f0100 
+x0100CMC      <- function() {f0100select(getstep("CUR_MKT_CAP_TFU",n="000"))}
+#' @rdname f0100 
+x0100EDYI     <- function() {f0100select(getstep("EQY_DVD_YLD_IND_TFU",n="000"))}
+#' @rdname f0100 
+x0100PE       <- function() {f0100select(getstep("PE_RATIO_TFU",n="000"))} 
+#' @rdname f0100 
+x0100PTCF     <- function() {f0100select(getstep("PX_TO_CASH_FLOW_TFU",n="000"))}
+#' @rdname f0100 
+x0100PTBR     <- function() {f0100select(getstep("PX_TO_BOOK_RATIO_TFU",n="000"))}
+#' @rdname f0100 
+x0100PV       <- function() {f0100select(getstep("PX_VOLUME_TFU",n="000"))}
+#' @rdname f0100 
+x0100EFFP     <- function() {f0100select(getstep("EQY_FREE_FLOAT_PCT_TFU",n="000"))}
+
+#' @export
 #select ranges inplace - zoo
 f0100select <- function(x=getbdh(type="zoo"),da=da.global,bui=bui.global) {
   stopifnot(is.zoo(x) && all(da%in%index(x)) && all(bui%in%colnames(x)))
@@ -61,8 +104,7 @@ f0100select <- function(x=getbdh(type="zoo"),da=da.global,bui=bui.global) {
 # x01BTPTselect <- function() {f0100select(getbdh("BEST_TARGET_PRICE_TFU"))}
 # x01PLTselect <- function() {f0100select(getbdh("PX_LAST_TFU"))}
 #_TTL,TTU,VWAP_TTU,MCAP_TTU,DIPR_TTU,ERPR_TTU,CAPR_TTU,BOPR_TTU,volume
-x0100BTP_TFU  <- function() {f0100select(getstep("BEST_TARGET_PRICE_TFU",n="000"))}
-x0100PL_TFU   <- function() {f0100select(getstep("PX_LAST_TFU",n="000"))}
+
 x0100PL_TTU   <- function() {f0100select(getstep("PX_LAST_TTU",n="000"))}
 x0100PL_TTL   <- function() {f0100select(getstep("PX_LAST_TTL",n="000"))}
 x0100EWAP_TTU <- function() {f0100select(getstep("EQY_WEIGHTED_AVG_PX_TTU",n="000"))}

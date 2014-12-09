@@ -5,6 +5,7 @@ require(aabd)
 require(aa0)
 require(pcalib)
 require(aautil)
+require(testthat)
 source("R/aaxtslib.R")
 
 #x <- as.xts(getbdh("PX_LAST_TTL"))
@@ -24,7 +25,7 @@ for(i in seq_along(xn100)) {
 for(i in seq_along(xn100)) {
   print(xn100[i])
   x <- do.call(getstep,args=list(mnem=xn100[i]))
-  index(x)==da.global
+  expect_true(all(index(x)==da.global))
 }
 
 
