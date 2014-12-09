@@ -1,6 +1,6 @@
 .onLoad <- function(libname, pkgname) {
   root.global <<- paste0(aabd::bbdir(),"/") #"../BBnew/" 
-  bui.global <<- buiindir(paste0(root.global,"BDH/RAW/BEST_TARGET_PRICE/TFU"))[1:2] #somewhat arbitrary?
+  bui.global <<- buiindir(paste0(root.global,"BDH/RAW/BEST_TARGET_PRICE/TFU")) #somewhat arbitrary?
   da.global <<- commonda(patt="CUR_MKT_CAP_TFU.RData")
   daw.global <<- as.Date(intersect(as.character(da.global),getca()))
   aapaenv <<- environment(x0100BTP_TFU) #this is the package environment - could be done better?
