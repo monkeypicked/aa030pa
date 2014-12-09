@@ -1,49 +1,43 @@
-
-#ls(environment(x0100BTP_TFU)) 
-
 .onLoad <- function(libname, pkgname) {
   root.global <<- paste0(aabd::bbdir(),"/") #"../BBnew/" 
-  bui.global <<- buiindir(paste0(root.global,"BDH/RAW/BEST_TARGET_PRICE/TFU"))[1:2]
+  bui.global <<- buiindir(paste0(root.global,"BDH/RAW/BEST_TARGET_PRICE/TFU"))[1:2] #somewhat arbitrary?
   da.global <<- commonda(patt="CUR_MKT_CAP_TFU.RData")
   daw.global <<- as.Date(intersect(as.character(da.global),getca()))
-  aapaenv <<- environment(x0100BTP_TFU)
+  aapaenv <<- environment(x0100BTP_TFU) #this is the package environment - could be done better?
   aapafun <<- ls(aapaenv)
   options("stringsAsFactors"=FALSE)
 }
 
-
-# da <- as.Date(sort(intersect(index(x),index(x0))))
-# bui <- intersect(colnames(x),colnames(x0))
-# x <- getbdh("EQY_WEIGHTED_AVG_PX_TFU",ty="z")[da,bui]
-# x0 <- getbdh("PX_LAST_TFU",ty="z")[da,bui]
-
-#source("c:/users/bloomberg/rsql/00lib.r")
-
+#' Derive all panels
+#'
+#' Top-level function that calls the others
+#' @param token character vector of strings match in function names
+#' @export
+deraapa <- function(token=c("^x0100","^x0200","^x0300","^x04","^x05","^x06","^x07")) {
+  for(j in seq_along(token)) {
+    xn <- aapafun[grep(token[j],aapafun)] 
+    print(xn)
+    for(i in seq_along(xn)) {
+      print(xn[i])
+      do.call(putstep,args=list(fun=xn[i]))
+    }
+  }
+}
 
 #' @export
 dern <- function(root=root.global,n="001",type=c("BDH","BDP")) {
   type <- match.arg(type)
   paste0(root,type,"/derive-",n,"/")
 }
+
 #' @export
 getstep <- function(mnem=dir(mydir)[1],mydir=dern(...),...) {load(paste0(mydir,mnem,".RData"));x}
+
 #' @export
 putstep <- function(fun="x01BTPTselect",mydir=dern(...),x=do.call(fun,args=list()),...) {
   stopifnot(exists(fun))
   save(x,file=paste0(mydir,fun,".RData"))
 }
-
-# commonbui <- function(...) {
-#   dd <- dern(...)
-#   ff <- dir(dd)
-#   load(paste0(paste0(dd,ff[1])))
-#   bui<-unique(colnames(x))
-#   for(i in 2:length(ff)) {
-#     load(paste0(paste0(dd,ff[i])))
-#     bui <-intersect(bui,unique(colnames(x)))
-#   }
-#   bui
-# }
 
 #commonbui - applies joinfun to raw directory contents
 #' @export
@@ -454,4 +448,5 @@ getusst <- function()
   xx[1,] <- NA
   0.01*zoo(focb.mat(xx),index(x))
 }
+
 

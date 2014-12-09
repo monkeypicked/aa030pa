@@ -1,5 +1,12 @@
 require(aapa)
+#######
+#USEAGE
+#######
+deraapa()  #simples
 
+######
+#TESTS
+######
 #step 100 - range------------------------------
 xn100 <- aapafun[grep("^x0100",aapafun)]
 for(i in seq_along(xn100)) {
@@ -76,3 +83,5 @@ for(i in seq_along(xnnnn)) {
   print(i)
   do.call(putstep,args=list(fun=xnnnn[i]))
 }
+
+
