@@ -1,21 +1,7 @@
-#select da, bui for this job
-require(xts)
-#source("R/src.R")
-require(aabd)
-require(aa0)
-require(pcalib)
-require(aautil)
-require(testthat)
-source("R/aaxtslib.R")
-
-#x <- as.xts(getbdh("PX_LAST_TTL"))
-root.global <- paste0(aabd::bbdir(),"/") #"../BBnew/" 
-bui.global <- buiindir(paste0(root.global,"BDH/RAW/BEST_TARGET_PRICE/TFU"))[1:2]
-da.global <- commonda(patt="CUR_MKT_CAP_TFU.RData")
-daw.global <- as.Date(intersect(as.character(da.global),getca()))
+require(aapa)
 
 #step 100 - range------------------------------
-xn100 <- ls()[grep("^x0100",ls())]
+xn100 <- aapafun[grep("^x0100",aapafun)]
 for(i in seq_along(xn100)) {
   print(xn100[i])
   print(i)
@@ -28,10 +14,9 @@ for(i in seq_along(xn100)) {
   expect_true(all(index(x)==da.global))
 }
 
-
 #step 200 - zero to na-------------------------
-xn100 <- ls()[grep("^x0100",ls())]
-xn200 <- ls()[grep("^x0200",ls())]
+xn100 <- aapafun[grep("^x0100",aapafun)]
+xn200 <- aapafun[grep("^x0200",aapafun)]
 
 for(i in seq_along(xn200)) {
   print(xn200[i])
@@ -53,7 +38,7 @@ for(i in seq_along(xn100)) {
 }
 
 #step 300 - remove outliers-------------------------
-xn300 <- ls()[grep("^x0300",ls())]
+xn300 <- aapafun[grep("^x0300",aapafun)]
 for(i in seq_along(xn300)) {
   print(xn300[i])
   print(i)
@@ -61,7 +46,7 @@ for(i in seq_along(xn300)) {
 }
 
 #step 400 - zero to na-------------------------
-xnnnn <- ls()[grep("^x04",ls())]
+xnnnn <- aapafun[grep("^x04",aapafun)]
 for(i in seq_along(xnnnn)) {
   print(xnnnn[i])
   print(i)
@@ -69,7 +54,7 @@ for(i in seq_along(xnnnn)) {
 }
 
 #step 500 - lags-------------------------
-xnnnn <- ls()[grep("^x05",ls())]
+xnnnn <- aapafun[grep("^x05",aapafun)]
 for(i in seq_along(xnnnn)) {
   print(xnnnn[i])
   print(i)
@@ -77,7 +62,7 @@ for(i in seq_along(xnnnn)) {
 }
 
 #step 600 - extract wed-------------------------
-xnnnn <- ls()[grep("^x06",ls())]
+xnnnn <- aapafun[grep("^x06",aapafun)]
 for(i in seq_along(xnnnn)) {
   print(xnnnn[i])
   print(i)
@@ -85,7 +70,7 @@ for(i in seq_along(xnnnn)) {
 }
 
 #step 700 - final custom calcs-------------------------
-xnnnn <- ls()[grep("^x07",ls())]
+xnnnn <- aapafun[grep("^x07",aapafun)]
 for(i in seq_along(xnnnn)) {
   print(xnnnn[i])
   print(i)

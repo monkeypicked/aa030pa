@@ -5,6 +5,8 @@ Version: 1.0
 Date: 2014-12-05
 Author: Giles Heywood
 Maintainer: Who to complain to <yourfault@somewhere.net>
+Depends:
+    aabd,xts,aa0,pcalib,aautil
 Description: A series of standardised operations are applied to data previously
     downloaded by aabd - these operations are dynamically defined to be all
     those found in the package
