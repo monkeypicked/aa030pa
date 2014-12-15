@@ -30,8 +30,15 @@ dern <- function(root=root.global,n="001",type=c("BDH","BDP")) {
   paste0(root,type,"/derive-",n,"/")
 }
 
+#' Get panel
+#'
+#' get a timeseries/cross-section panel or cross-section of reference data
+#' @param mnem filename without extension
+#' @param mydir directory
+#' @param ... passed to dern to construct mydir
+#' @examples getstep('NAME',n='000',typ='BDP')
 #' @export
-getstep <- function(mnem=dir(mydir)[1],mydir=dern(...),...) {load(paste0(mydir,mnem,".RData"));x}
+getstep <- function(mnem=strsplit(dir(mydir)[1],split="\\.")[[1]][1],mydir=dern(...),...) {load(paste0(mydir,mnem,".RData"));x}
 
 #' @export
 putstep <- function(fun="x01BTPTselect",mydir=dern(...),x=do.call(fun,args=list()),...) {
