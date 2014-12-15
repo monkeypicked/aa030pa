@@ -196,7 +196,7 @@ x0300EWAP_TTU  <- function(){f0300outlier(x=getstep("x0200EWAP_TTU"),x0=getstep(
 NULL
 #' @export
 f0400rollop <- function(x){
-  rollxts(x,what="median",n=5)
+  rollxts(x,what="median",n=5)  #works correctly on both xts and zoo
 }
 f0401rollop <- function(x){
   rollxts(x,what="median",n=260)
@@ -217,7 +217,7 @@ x0401PV   <- function(){f0401rollop(getstep("x0200PV"))}
 NULL
 #' @export
 f0501lag <- function(x){
-  lag.xts(x=x,k=1)
+  lag.xts(x=x,k=1)  #+ve lag is feasible ie past -> future
 }
 f0502lag <- function(x){
   lag.xts(x=x,k=2)
@@ -284,7 +284,7 @@ x0502EFFP    <- function(){f0502lag(getstep("x0200EFFP"))}
 NULL
 #' @export
 f0600wed <- function(x){  #locf
-  dtlocf(x,wd=3,roll=4)
+  dtlocf(x,wd=3,roll=5)
 }
 #' @export
 #' @rdname f0600 
@@ -343,7 +343,7 @@ x0602PTBR    <- function(){f0600wed(getstep("x0502PTBR"))}
 x0602EFFP    <- function(){f0600wed(getstep("x0502EFFP"))}
 
 f0603wed <- function(x){  #focb
-  dtlocf(x,wd=3,roll=-4)
+  dtlocf(x,wd=3,roll=-5)
 }
 #' @export
 #' @rdname f0600 
@@ -365,12 +365,12 @@ NULL
 #' @export
 #calcs
 #' @export
-f0700return <- function(x){
-  as.zoo(retxts(x))[daw.global,,drop=FALSE]
+f0700return <- function(x){ #this is safe for both zoo and xts
+  as.zoo(retxts(as.xts(x)))[daw.global,,drop=FALSE]
 }
 #' @export
 f0700premium <- function(x){
-  x1 <- as.zoo(retxts(x))[daw.global,,drop=FALSE]
+  x1 <- as.zoo(retxts(as.xts(x)))[daw.global,,drop=FALSE]
   x2 <- getusst()[daw.global,,drop=FALSE]
   i <- as.Date(intersect(index(x1),index(x2)),origin="1970-01-01")
   sweep(x1[i],FUN="-",STAT=x2[i],MAR=1)
