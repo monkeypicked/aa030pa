@@ -13,7 +13,7 @@
 #' Top-level function that calls the others
 #' @param token character vector of strings match in function names
 #' @export
-deraapa <- function(token=c("^x0100","^x0200","^x0300","^x04","^x05","^x06","^x07")) {
+deraapa <- function(token=c("^x0100","^x0200","^x0300","^x04","^x05","^x06","^x07","^x08")) {
   for(j in seq_along(token)) {
     xn <- aapafun[grep(token[j],aapafun)] 
     print(xn)
@@ -25,7 +25,7 @@ deraapa <- function(token=c("^x0100","^x0200","^x0300","^x04","^x05","^x06","^x0
 }
 
 #' @export
-dern <- function(root=root.global,n="001",type=c("BDH","BDP")) {
+dern <- function(root=root.global,n="001",type=c("BDH","BDP","macro")) {
   type <- match.arg(type)
   paste0(root,type,"/derive-",n,"/")
 }
@@ -114,7 +114,9 @@ x0100PV       <- function() {f0100select(getstep("PX_VOLUME_TFU",n="000"))}
 #' @export
 #' @rdname f0100 
 x0100EFFP     <- function() {f0100select(getstep("EQY_FREE_FLOAT_PCT_TFU",n="000"))}
-
+#' @export
+#' @rdname f0100 
+x0100VIX     <- function() {getstep("VIX",n="000",typ="macro")}
 #' @export
 #select ranges inplace - zoo
 f0100select <- function(x=getbdh(type="zoo"),da=da.global,bui=bui.global) {
@@ -172,6 +174,9 @@ x0200PV      <- function(){f0200zerotona(getstep("x0100PV"))}
 #' @export
 #' @rdname f0200 
 x0200EFFP    <- function(){f0200zerotona(getstep("x0100EFFP"))}
+#' @export
+#' @rdname f0200 
+x0200VIX    <- function(){f0200zerotona(getstep("x0100VIX"))}
 
 #####0300
 #' outlier detect and correct x by comparison with x0
@@ -201,6 +206,12 @@ f0400rollop <- function(x){
 f0401rollop <- function(x){
   rollxts(x,what="median",n=260)
 }
+f0402rollop <- function(x){
+  rollxts(x = x, 
+          what = "meantri", 
+          n = 20
+  )
+}
 #' @export
 #' @rdname f0400 
 x0400BTP_TFU  <- function(){f0400rollop(getstep("x0200BTP_TFU"))}
@@ -210,6 +221,9 @@ x0400PL_TFU   <- function(){f0400rollop(getstep("x0200PL_TFU"))}
 #' @export
 #' @rdname f0400 
 x0401PV   <- function(){f0401rollop(getstep("x0200PV"))}
+#' @export
+#' @rdname f0400 
+x0402VIX   <- function(){f0402rollop(getstep("x0200VIX"))}
 
 #####0500
 #' lag xts
@@ -277,6 +291,9 @@ x0502PTBR    <- function(){f0502lag(getstep("x0200PTBR"))}
 #' @export
 #' @rdname f0500 
 x0502EFFP    <- function(){f0502lag(getstep("x0200EFFP"))}
+#' @export
+#' @rdname f0500 
+x0502VIX    <- function(){f0502lag(getstep("x0402VIX"))}
 
 #####0600
 #' last observation carry forward
@@ -423,6 +440,8 @@ x0701capr     <-  function(...){getstep("x0601PTCF")}
 #' @rdname f0700 
 x0701bopr     <-  function(...){getstep("x0601PTBR")}
 
+#' @export
+#' @rdname f0700 
 x0702best     <- function(...){getstep("x0602BTP_TFU")/getstep("x0602PL_TFU")}
 #' @export
 #' @rdname f0700 
@@ -456,4 +475,20 @@ getusst <- function()
   0.01*zoo(focb.mat(xx),index(x))
 }
 
+#' @export
+x0802best     <- function(...){
+  x <- getstep("x0702best")
+  coredata(x)[which(coredata(x)<0.1)] <- 0.1
+  coredata(x)[which(coredata(x)>3)] <- 3
+  dtlocf(x,roll=TRUE,rollends=c(FALSE,TRUE))
+}
 
+#' @export
+x0802beta     <- function(...){
+  mz(tabtomat(getrd(max(greprd("ce")))[,list(date,bui,betamcp)]))
+}
+
+#' @export
+x0802mcap     <- function(...){
+  dtlocf(rollxts(log(getstep("x0702mcap")),"mean",5),roll=TRUE,rollends=c(FALSE,TRUE))
+}
