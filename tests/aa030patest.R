@@ -1,12 +1,15 @@
 require(aapa)
+require(testthat)
 #######
 #USEAGE
 #######
-deraapa()  #simples
-
+if(FALSE) {
+  deraapa()  #simples (what about macro?)
+}
 ######
 #TESTS
 ######
+bui.global <- bui.global[1:10] #save time
 #step 100 - range------------------------------
 xn100 <- aapafun[grep("^x0100",aapafun)]
 for(i in seq_along(xn100)) {
@@ -18,7 +21,7 @@ for(i in seq_along(xn100)) {
 for(i in seq_along(xn100)) {
   print(xn100[i])
   x <- do.call(getstep,args=list(mnem=xn100[i]))
-  expect_true(all(index(x)==da.global))
+  expect_true(all(da.global%in%index(x))) #not identical for macro
 }
 
 #step 200 - zero to na-------------------------
