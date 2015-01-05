@@ -30,6 +30,26 @@ dern <- function(root=root.global,n="001",type=c("BDH","BDP","macro")) {
   paste0(root,type,"/derive-",n,"/")
 }
 
+#' Get multiple reference data for all bui
+#'
+#' the root of all the filenames in the directory
+#' @param mydir directory
+#' @param mnem mnemonics (fields)
+#' @export
+getbdp <- function(mydir=dern(n="000",typ="BDP"),mnem=bdp1con()[,field]) {
+  #loadx <- function(mydir,mnem){{load(paste0(mydir,mnem,".RData"));x}}
+  dt<-getstep(mnem=mnem[1],mydir=mydir)
+  if(1<length(mnem)) for(i in 2:length(mnem)) dt <- dt[getstep(mnem=mnem[i],mydir=mydir)]
+  dt
+}
+
+#' Get mnemonics
+#'
+#' return the root of all the filenames in the directory
+#' @param mydir directory
+#' @export
+getmnem <- function(mydir=dern(...),...) { unlist(lapply(lapply(lapply(dir(mydir),strsplit,split="\\."),"[[",1),"[",1))}
+
 #' Get panel
 #'
 #' get a timeseries/cross-section panel or cross-section of reference data
