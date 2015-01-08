@@ -1,5 +1,13 @@
 require(aapa)
 require(testthat)
+aa020bdtest <- TRUE
+root.global <<- paste0(bbdir(),"/")
+
+nbui <- 3
+bui.global <<- buiindirs()
+bui.global <<- bui.global[1:min(nbui,length(bui.global))]
+
+
 #######
 #USEAGE
 #######
@@ -9,7 +17,6 @@ if(FALSE) {
 ######
 #TESTS
 ######
-bui.global <- bui.global[1:10] #save time
 #step 100 - range------------------------------
 xn100 <- aapafun[grep("^x0100",aapafun)]
 for(i in seq_along(xn100)) {
