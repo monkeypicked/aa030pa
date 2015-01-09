@@ -1,7 +1,10 @@
 require(aapa)
 require(testthat)
-aa020bdtest <- TRUE
-root.global <<- paste0(bbdir(),"/")
+require(aautil)
+#aa020bdtest <- TRUE
+aatopselect("test")
+
+#root.global <<- paste0(bbdir(),"/")
 
 nbui <- 3
 bui.global <<- buiindirs()
