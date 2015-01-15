@@ -30,11 +30,6 @@ deraapa <- function(token=c("^x0100","^x0200","^x0300","^x04","^x05","^x06","^x0
   }
 }
 
-#' @export
-dern <- function(root=root.global,n="001",type=c("BDH","BDP","macro")) {
-  type <- match.arg(type)
-  paste0(root,type,"/derive-",n,"/")
-}
 
 #' Get multiple reference data for all bui
 #'
@@ -517,4 +512,58 @@ x0802beta     <- function(...){
 #' @export
 x0802mcap     <- function(...){
   dtlocf(rollxts(log(getstep("x0702mcap")),"mean",5),roll=TRUE,rollends=c(FALSE,TRUE))
+}
+
+#' @export
+zoolist <- function(patt="0700",fnam=dir(dern())[grep(patt,dir(dern()))]) {
+  mnem<-vector("list")
+  for(i in 1:length(fnam)) mnem[i] <- strsplit(fnam[i],split="\\.")[[1]][1]
+  x<-lapply(mnem,getstep)
+  names(x) <- mnem
+  x
+}
+
+#' @export
+dtlist <- function(...) {
+  x <- zoolist(...)
+  dt1 <- lapply(lapply(x,zootodt),setkeyv,c('bui','date'))
+  for(i in 1:length(dt1)) {setnames(dt1[[i]],old='x',new=names(dt1[i]))}
+  dt1
+}
+
+#' @export
+combokey0 <- function(x=zoolist(),fun=c("union","intersect"),ij=c('rownames','colnames')) {
+  ij <- match.arg(ij)
+  setnames(data.table(sort(Reduce(match.arg(fun), lapply(x,get(ij)))),key='V1'),ifelse(ij=='rownames','date','bui'))[]
+}
+#' @export
+combokey <- function(...,drop="VIX") {
+  x <- combokey0(...)
+  if(identical(colnames(x),"date")) x[[1]] <- as.Date(x[[1]])
+  x[!(unlist(x[,1,with=FALSE])%in%drop)]
+}
+#' @export
+buidate <- function(bui=combokey(ij='col'),da=combokey(ij='row')[ca]) {
+  expand.grid(unique(unlist(bui)),as.Date(unique(unlist(da))))
+}
+
+#' @export
+cart <- function(bui=combokey(ij='col'),da=xda(1)) {
+  setkey(setnames(data.table(expand.grid(bui[,bui],da[,date],stringsAsFactors=FALSE)),c('bui','date')),bui,date)[]
+}
+
+#' @export
+xda <- function(extend=10,da=combokey()) {
+  unique(rbindlist(list(da,data.table(offda(da[,max(date)],0:extend)))))
+}
+
+#' @export
+mergedt <- function(x=dtlist(),initial=cart()) {
+  Reduce(f=function(x,y) merge(x,y,all=TRUE),x=x)
+}
+
+#rows with no na
+#' @export
+nonadt <- function(x=mergedt()) {
+  x[x[,all(!is.na(.SD)),key(x)][V1==TRUE]][,V1:=NULL][]
 }
