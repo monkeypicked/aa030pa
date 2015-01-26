@@ -1,14 +1,16 @@
 require(aapa)
+aatopselect("test")
+supa.der()  #this must currently be run after require(aapa) but cannot go into .onLoad or build fails, which is a pain dk how to fix this
 require(testthat)
 require(aautil)
 #aa020bdtest <- TRUE
-aatopselect("test")
+#aatopselect("test")
 
 #root.global <<- paste0(bbdir(),"/")
 
-nbui <- 3
-bui.global <<- buiindirs()
-bui.global <<- bui.global[1:min(nbui,length(bui.global))]
+# nbui <- 3
+# bui.global <<- buiindirs()
+# bui.global <<- bui.global[1:min(nbui,length(bui.global))]
 
 
 #######
@@ -31,7 +33,7 @@ for(i in seq_along(xn100)) {
 for(i in seq_along(xn100)) {
   print(xn100[i])
   x <- do.call(getstep,args=list(mnem=xn100[i]))
-  expect_true(all(da.global%in%index(x))) #not identical for macro
+  expect_true(all(getdapa()%in%index(x))) #not identical for macro
 }
 
 #step 200 - zero to na-------------------------

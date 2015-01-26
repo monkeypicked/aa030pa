@@ -1,18 +1,32 @@
 .onLoad <- function(libname, pkgname) {
   options("stringsAsFactors"=FALSE)
   if(!exists("root.global")) aatopselect()
-  .global()
+  #.global()
 }
 
 #' @export
-.global <- function(libname, pkgname) {
+supa.der <- function(libname, pkgname) {
   #root.global <<- paste0(aabd::bbdir(),"/") #"../BBnew/" 
-  bui.global <<- buiindir(paste0(root.global,"BDH/RAW/BEST_TARGET_PRICE/TFU")) #somewhat arbitrary?
-  da.global <<- commonda(patt="CUR_MKT_CAP_TFU.RData")
-  daw.global <<- as.Date(intersect(da.global,aautil::derca()[,date]))
+  #bui.global <<- buiindir(paste0(root.global,"BDH/RAW/BEST_TARGET_PRICE/TFU")) #somewhat arbitrary?
+  #da.global <<- commonda(patt="CUR_MKT_CAP_TFU.RData")
+  #daw.global <<- combokey()[,date] #as.Date(intersect(da.global,aautil::derca()[,date]))
+  #daw.global <<- as.Date(intersect(da.global,derca()[,date]),origin=as.Date('1970-01-01'))
+  bui.local <- buiindir(paste0(root.global,"BDH/RAW/BEST_TARGET_PRICE/TFU"))
+  da.local <<- commonda(patt="CUR_MKT_CAP_TFU.RData")
+  daw.local <<- as.Date(intersect(da.local,derca()[,date]),origin=as.Date('1970-01-01'))
+  supad.g <<- cart(bui=data.table(bui=bui.local),da=data.table(date=da.local))
+  supaw.g <<- cart(bui=data.table(bui=bui.local),da=data.table(date=daw.local))
+#  supa.g <<- cart(bui=data.table(bui=bui.global),da=data.table(date=daw.global))
   aapaenv <<- environment(x0100BTP_TFU) #this is the package environment - could be done better?
   aapafun <<- ls(aapaenv)
 }
+
+#' @export
+getdawpa <- function() {supaw.g[,unique(date)]}
+#' @export
+getdapa <- function() {supad.g[,unique(date)]}
+#' @export
+getbuipa <- function() {supaw.g[,unique(bui)]}
 
 #' Derive all panels
 #'
@@ -140,7 +154,7 @@ x0100EFFP     <- function() {f0100select(getstep("EQY_FREE_FLOAT_PCT_TFU",n="000
 x0100VIX     <- function() {getstep("VIX",n="000",typ="macro")}
 #' @export
 #select ranges inplace - zoo
-f0100select <- function(x=getbdh(type="zoo"),da=da.global,bui=bui.global) {
+f0100select <- function(x=getbdh(type="zoo"),da=supad.g[,unique(date)],bui=supad.g[,unique(bui)]) {
   stopifnot(is.zoo(x) && all(da%in%index(x)) && all(bui%in%colnames(x)))
   x[da,bui]
 }
@@ -404,12 +418,12 @@ NULL
 #calcs
 #' @export
 f0700return <- function(x){ #this is safe for both zoo and xts
-  as.zoo(retxts(as.xts(x)))[daw.global,,drop=FALSE]
+  as.zoo(retxts(as.xts(x)))[getdawpa(),,drop=FALSE]
 }
 #' @export
 f0700premium <- function(x){
-  x1 <- as.zoo(retxts(as.xts(x)))[daw.global,,drop=FALSE]
-  x2 <- getusst()[daw.global,,drop=FALSE]
+  x1 <- as.zoo(retxts(as.xts(x)))[getdawpa(),,drop=FALSE]
+  x2 <- getusst()[getdawpa(),,drop=FALSE]
   i <- as.Date(intersect(index(x1),index(x2)),origin="1970-01-01")
   sweep(x1[i],FUN="-",STAT=x2[i],MAR=1)
 }
@@ -488,7 +502,7 @@ x0702bopr     <-  function(...){getstep("x0602PTBR")}
 getusst <- function()
 {
   load(paste0(root.global,"/macro/derive-000/US0001m.RData"))
-  x <- dtlocf(x)[daw.global,drop=FALSE]
+  x <- dtlocf(x)[getdawpa(),drop=FALSE]
   n <- nrow(x)
   xx <- coredata(x)
   xx[-1,] <- xx[-n, ] * diff(as.numeric(as.Date(index(x))))/365
@@ -496,74 +510,21 @@ getusst <- function()
   0.01*zoo(focb.mat(xx),index(x))
 }
 
-#' @export
-x0802best     <- function(...){
-  x <- getstep("x0702best")
-  coredata(x)[which(coredata(x)<0.1)] <- 0.1
-  coredata(x)[which(coredata(x)>3)] <- 3
-  dtlocf(x,roll=TRUE,rollends=c(FALSE,TRUE))
-}
-
-#' @export
-x0802beta     <- function(...){
-  mz(tabtomat(getrd(max(greprd("ce")))[,list(date,bui,betamcp)]))
-}
-
-#' @export
-x0802mcap     <- function(...){
-  dtlocf(rollxts(log(getstep("x0702mcap")),"mean",5),roll=TRUE,rollends=c(FALSE,TRUE))
-}
-
-#' @export
-zoolist <- function(patt="0700",fnam=dir(dern())[grep(patt,dir(dern()))]) {
-  mnem<-vector("list")
-  for(i in 1:length(fnam)) mnem[i] <- strsplit(fnam[i],split="\\.")[[1]][1]
-  x<-lapply(mnem,getstep)
-  names(x) <- mnem
-  x
-}
-
-#' @export
-dtlist <- function(...) {
-  x <- zoolist(...)
-  dt1 <- lapply(lapply(x,zootodt),setkeyv,c('bui','date'))
-  for(i in 1:length(dt1)) {setnames(dt1[[i]],old='x',new=names(dt1[i]))}
-  dt1
-}
-
-#' @export
-combokey0 <- function(x=zoolist(),fun=c("union","intersect"),ij=c('rownames','colnames')) {
-  ij <- match.arg(ij)
-  setnames(data.table(sort(Reduce(match.arg(fun), lapply(x,get(ij)))),key='V1'),ifelse(ij=='rownames','date','bui'))[]
-}
-#' @export
-combokey <- function(...,drop="VIX") {
-  x <- combokey0(...)
-  if(identical(colnames(x),"date")) x[[1]] <- as.Date(x[[1]])
-  x[!(unlist(x[,1,with=FALSE])%in%drop)]
-}
-#' @export
-buidate <- function(bui=combokey(ij='col'),da=combokey(ij='row')[ca]) {
-  expand.grid(unique(unlist(bui)),as.Date(unique(unlist(da))))
-}
-
-#' @export
-cart <- function(bui=combokey(ij='col'),da=xda(1)) {
-  setkey(setnames(data.table(expand.grid(bui[,bui],da[,date],stringsAsFactors=FALSE)),c('bui','date')),bui,date)[]
-}
-
-#' @export
-xda <- function(extend=10,da=combokey()) {
-  unique(rbindlist(list(da,data.table(offda(da[,max(date)],0:extend)))))
-}
-
-#' @export
-mergedt <- function(x=dtlist(),initial=cart()) {
-  Reduce(f=function(x,y) merge(x,y,all=TRUE),x=x)
-}
-
-#rows with no na
-#' @export
-nonadt <- function(x=mergedt()) {
-  x[x[,all(!is.na(.SD)),key(x)][V1==TRUE]][,V1:=NULL][]
-}
+# #' @export
+# x0802best     <- function(...){
+#   x <- getstep("x0702best")
+#   coredata(x)[which(coredata(x)<0.1)] <- 0.1
+#   coredata(x)[which(coredata(x)>3)] <- 3
+#   dtlocf(x,roll=TRUE,rollends=c(FALSE,TRUE))
+# }
+# 
+# #' @export
+# x0802beta     <- function(...){
+#   mz(tabtomat(getrd(max(greprd("ce")))[,list(date,bui,betamcp)]))
+# }
+# 
+# #' @export
+# x0802mcap     <- function(...){
+#   dtlocf(rollxts(log(getstep("x0702mcap")),"mean",5),roll=TRUE,rollends=c(FALSE,TRUE))
+# }
+# 
