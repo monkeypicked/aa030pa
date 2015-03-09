@@ -1,17 +1,7 @@
 require(aapa)
-aatopselect("test")
-supa.der()  #this must currently be run after require(aapa) but cannot go into .onLoad or build fails, which is a pain dk how to fix this
 require(testthat)
-require(aautil)
-#aa020bdtest <- TRUE
-#aatopselect("test")
 
-#root.global <<- paste0(bbdir(),"/")
-
-# nbui <- 3
-# bui.global <<- buiindirs()
-# bui.global <<- bui.global[1:min(nbui,length(bui.global))]
-
+aatopselect("test")
 
 #######
 #USEAGE
