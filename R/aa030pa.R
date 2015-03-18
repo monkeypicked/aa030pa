@@ -1,18 +1,29 @@
 
-# #' @export supa.der <- function(libname, pkgname) { #root.global <<- paste0(aabd::bbdir(),'/') #'../BBnew/'
-# #bui.global <<- buiindir(paste0(root.global,'BDH/RAW/BEST_TARGET_PRICE/TFU')) #somewhat arbitrary?  #da.global <<-
-# commonda(patt='CUR_MKT_CAP_TFU.RData') #daw.global <<- combokey()[,date]
-# #as.Date(intersect(da.global,aautil::derca()[,date])) #daw.global <<-
-# as.Date(intersect(da.global,derca()[,date]),origin=as.Date('1970-01-01')) bui.local <-
-# buiindir(paste0(root.global,'BDH/RAW/BEST_TARGET_PRICE/TFU')) da.local <<- commonda(patt='CUR_MKT_CAP_TFU.RData')
-# daw.local <<- as.Date(intersect(da.local,derca()[,date]),origin=as.Date('1970-01-01')) supad.g <<-
-# cart(bui=data.table(bui=bui.local),da=data.table(date=da.local)) supaw.g <<-
-# cart(bui=data.table(bui=bui.local),da=data.table(date=daw.local)) # supa.g <<-
-# cart(bui=data.table(bui=bui.global),da=data.table(date=daw.global)) aapaenv <<- environment(x0100BTP_TFU) #this is
-# the package environment - could be done better?  aapafun <<- ls(aapaenv) }
+#' @export 
+supa.der <- function(libname, pkgname) { 
+#' #root.global <<- paste0(aabd::bbdir(),'/') #'../BBnew/'
+bui.global <<- buiindir(paste0(root.global,'BDH/RAW/BEST_TARGET_PRICE/TFU')) #somewhat arbitrary?  
+da.global <<-commonda(patt='CUR_MKT_CAP_TFU.RData') 
+#daw.global <<- combokey()[,date] #as.Date(intersect(da.global,aautil::derca()[,date])) 
+daw.global <<- as.Date(intersect(da.global,derca()[,date]),origin=as.Date('1970-01-01')) 
+bui.local <-buiindir(paste0(root.global,'BDH/RAW/BEST_TARGET_PRICE/TFU')) 
+da.local <<- commonda(patt='CUR_MKT_CAP_TFU.RData')
+daw.local <<- as.Date(intersect(da.local,derca()[,date]),origin=as.Date('1970-01-01')) 
+supad.g <<-cart(bui=data.table(bui=bui.local),da=data.table(date=da.local)) 
+supaw.g <<-cart(bui=data.table(bui=bui.local),da=data.table(date=daw.local)) # 
+supa.g <<- cart(bui=data.table(bui=bui.global),da=data.table(date=daw.global)) 
+aapaenv <<- environment(x0100BTP_TFU) #this isthe package environment - could be done better?  
+aapafun <<- ls(aapaenv) 
+}
 
+
+#' The first sentence becomes the title of the documentation.
+#' 
+#' The second paragraph is the description: this comes first in the documentation and should briefly describe what the function does. 
+#' 
+#' The third and subsequent paragraphs go into the details: this is a (often long) section that is shown after the argument description and should go into detail about how the function works.
 #' @export
-getdawpa <- function() {
+getdawpa <- function(x=1,y=letters,...) {
     supaw.g[, unique(date)]
 }
 #' @export

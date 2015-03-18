@@ -1,5 +1,6 @@
 require(aapa)
 require(testthat)
+supa.der
 
 aatopselect("test")
 
