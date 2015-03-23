@@ -24,7 +24,7 @@ getbuipa <- function() {
 #' Top-level function that calls the others
 #' @param token character vector of strings match in function names
 #' @export
-deraapa <- function(token = c("^x0100", "^x0200", "^x0300", "^x04", "^x05", "^x06", "^x07", "^x08")) {
+deraapa <- function(token = c("^x0100", "^x0200", "^x03", "^x04", "^x05", "^x06", "^x07", "^x08")) {
     for (j in seq_along(token)) {
         xn <- aapafun[grep(token[j], aapafun)]
         print(xn)
@@ -261,10 +261,32 @@ f0300outlier <- function(x, x0, tol = 0.1) {
     coredata(x) <- coredata(x0) * xx
     x
 }
+f0301outlier <- function(x, thresh = 0.01, reciprocal=TRUE) {
+  stopifnot(is.zoo(x))
+  if(reciprocal) x <- 1/x
+  xx <- winsoriser(data.table(mattotab(x)),field='field',thresh=thresh)
+  res <- tabtomat(data.frame(xx))
+  if(reciprocal) res <- 1/res
+  zoo(res,index(x))
+}
+
+
 #' @export
 #' @rdname f0300 
 x0300EWAP_TTU <- function() {
     f0300outlier(x = getstep("x0200EWAP_TTU"), x0 = getstep("x0200PL_TTU"))
+}
+x0301EDYI <- function() {
+  f0301outlier(x = getstep("x0200EDYI"),reciprocal=FALSE)
+}
+x0301PE <- function() {
+  f0301outlier(x = getstep("x0200PE"))
+}
+x0301PTCF <- function() {
+  f0301outlier(x = getstep("x0200PTCF"))
+}
+x0301PTBR <- function() {
+  f0301outlier(x = getstep("x0200PTBR"))
 }
 
 ##### 0400
@@ -336,22 +358,22 @@ x0501CMC <- function() {
 #' @export
 #' @rdname f0500 
 x0501EDYI <- function() {
-    f0501lag(getstep("x0200EDYI"))
+    f0501lag(getstep("x0301EDYI"))
 }
 #' @export
 #' @rdname f0500 
 x0501PE <- function() {
-    f0501lag(getstep("x0200PE"))
+    f0501lag(getstep("x0301PE"))
 }
 #' @export
 #' @rdname f0500 
 x0501PTCF <- function() {
-    f0501lag(getstep("x0200PTCF"))
+    f0501lag(getstep("x0301PTCF"))
 }
 #' @export
 #' @rdname f0500 
 x0501PTBR <- function() {
-    f0501lag(getstep("x0200PTBR"))
+    f0501lag(getstep("x0301PTBR"))
 }
 #' @export
 #' @rdname f0500 
@@ -538,17 +560,15 @@ x0603EWAP_TTU <- function() {
 
 #' @export
 #' @rdname f0600 
-x0604PL_TTL <- function(x = getstep("x0200PL_TTL")) {
-    dd <- index(resvol()) #resvol accesses 
-    dtlocf(x, date = dd, roll = 5)
+x0601PLDV_TTU <- function() { #following the convention 01=from past
+    dd <- index(resampvix(x=getstep('VIX',myd=dern(ty='m',n='000'))))
+    dtlocf(lag.xts(x = getstep("x0200PL_TTU"), k = 1), date = dd, roll = 5)
+}
+x0603PLDV_TTU <- function() { #following the convention 03=from future
+  dd <- index(resampvix(x=getstep('VIX',myd=dern(ty='m',n='000'))))
+  dtlocf(getstep("x0200PL_TTU"), date = dd, roll = -5)
 }
 
-#' @export
-#' @rdname f0600 
-x0605PL_TTL <- function(x = getstep("x0200PL_TTL")) {
-  dd <- index(resvol()) #resvol accesses 
-  dtlocf(x, date = dd, roll = 5)
-}
 
 ##### 0700
 #' custom calculations
@@ -635,17 +655,17 @@ x0701dipr <- function(...) {
 #' @export
 #' @rdname f0700 
 x0701erpr <- function(...) {
-    getstep("x0601PE")
+    saferecip(getstep("x0601PE"))
 }
 #' @export
 #' @rdname f0700 
 x0701capr <- function(...) {
-    getstep("x0601PTCF")
+  saferecip(getstep("x0601PTCF"))
 }
 #' @export
 #' @rdname f0700 
 x0701bopr <- function(...) {
-    getstep("x0601PTBR")
+  saferecip(getstep("x0601PTBR"))
 }
 
 
@@ -687,10 +707,15 @@ x0702bopr <- function(...) {
 
 #' @export
 #' @rdname f0700 
-x0704redoto <- function(...) {
-    as.zoo(retxts(as.xts(getstep("x0604PL_TTL"))))
+x0701redv <- function(...) {
+    as.zoo(retxts(as.xts(getstep("x0601PLDV_TTU"))))
 }
 
+#' @export
+#' @rdname f0700 
+x0703redv <- function(...) {
+  as.zoo(retxts(as.xts(getstep("x0603PLDV_TTU"))))
+}
 
 
 #' @export
@@ -725,7 +750,7 @@ lastqtile <- function(x=getstep('VIX',myd=dern(ty='m',n='000')), n = 5, start = 
 
 # go through dates; wait until volq has summed to n; this is next date [was res1]
 #' @export
-resvol <- function(x=getstep('VIX',myd=dern(ty='m',n='000')),volq=lastqtile(x), n = 5) {
+resampvix <- function(x=getstep('VIX',myd=dern(ty='m',n='000')),volq=lastqtile(x), n = 5) {
   stopifnot(is.zoo(x) && is.matrix(x) && is.matrix(volq) && nrow(x)==nrow(volq))
   volq <- zoo(volq,index(x))
   i1 <- 1
