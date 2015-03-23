@@ -1,20 +1,4 @@
 
-#' @export 
-supa.der <- function(libname, pkgname) { 
-#' #root.global <<- paste0(aabd::bbdir(),'/') #'../BBnew/'
-bui.global <<- buiindir(paste0(root.global,'BDH/RAW/BEST_TARGET_PRICE/TFU')) #somewhat arbitrary?  
-da.global <<-commonda(patt='CUR_MKT_CAP_TFU.RData') 
-#daw.global <<- combokey()[,date] #as.Date(intersect(da.global,aautil::derca()[,date])) 
-daw.global <<- as.Date(intersect(da.global,derca()[,date]),origin=as.Date('1970-01-01')) 
-bui.local <-buiindir(paste0(root.global,'BDH/RAW/BEST_TARGET_PRICE/TFU')) 
-da.local <<- commonda(patt='CUR_MKT_CAP_TFU.RData')
-daw.local <<- as.Date(intersect(da.local,derca()[,date]),origin=as.Date('1970-01-01')) 
-supad.g <<-cart(bui=data.table(bui=bui.local),da=data.table(date=da.local)) 
-supaw.g <<-cart(bui=data.table(bui=bui.local),da=data.table(date=daw.local)) # 
-supa.g <<- cart(bui=data.table(bui=bui.global),da=data.table(date=daw.global)) 
-aapaenv <<- environment(x0100BTP_TFU) #this isthe package environment - could be done better?  
-aapafun <<- ls(aapaenv) 
-}
 
 
 #' The first sentence becomes the title of the documentation.
@@ -555,8 +539,15 @@ x0603EWAP_TTU <- function() {
 #' @export
 #' @rdname f0600 
 x0604PL_TTL <- function(x = getstep("x0200PL_TTL")) {
-    dd <- getrd(greprd("resvolvix"))
+    dd <- index(resvol()) #resvol accesses 
     dtlocf(x, date = dd, roll = 5)
+}
+
+#' @export
+#' @rdname f0600 
+x0605PL_TTL <- function(x = getstep("x0200PL_TTL")) {
+  dd <- index(resvol()) #resvol accesses 
+  dtlocf(x, date = dd, roll = 5)
 }
 
 ##### 0700
@@ -702,7 +693,6 @@ x0704redoto <- function(...) {
 
 
 
-# getusst
 #' @export
 getusst <- function() {
     load(paste0(root.global, "/macro/derive-000/US0001m.RData"))
@@ -714,7 +704,44 @@ getusst <- function() {
     0.01 * zoo(focb.mat(xx), index(x))
 }
 
-# #' @export x0802best <- function(...){ x <- getstep('x0702best') coredata(x)[which(coredata(x)<0.1)] <- 0.1
-# coredata(x)[which(coredata(x)>3)] <- 3 dtlocf(x,roll=TRUE,rollends=c(FALSE,TRUE)) } #' @export x0802beta <-
-# function(...){ mz(tabtomat(getrd(max(greprd('ce')))[,list(date,bui,betamcp)])) } #' @export x0802mcap <-
-# function(...){ dtlocf(rollxts(log(getstep('x0702mcap')),'mean',5),roll=TRUE,rollends=c(FALSE,TRUE)) } 
+
+
+
+# rolling quantiles - intended for devol
+#' @export
+lastqtile <- function(x=getstep('VIX',myd=dern(ty='m',n='000')), n = 5, start = 2 * n, maxwin = 200 * n) {
+  if (is.zoo(x)) 
+    x <- coredata(x)
+  res <- x * NA
+  for (i in seq(from = start, to = length(x), by = 1)) {
+    i1 <- max(1, i - maxwin):i
+    xx <- x[i1][!is.na(x[i1])]
+    ii <- length(xx)
+    if (n < length(xx)) 
+      res[i] <- ceiling(n * rank(xx)[ii]/ii)
+  }
+  res
+}
+
+# go through dates; wait until volq has summed to n; this is next date [was res1]
+#' @export
+resvol <- function(x=getstep('VIX',myd=dern(ty='m',n='000')),volq=lastqtile(x), n = 5) {
+  stopifnot(is.zoo(x) && is.matrix(x) && is.matrix(volq) && nrow(x)==nrow(volq))
+  volq <- zoo(volq,index(x))
+  i1 <- 1
+  i2 <- 1
+  sumvol <- 0
+  dd <- index(volq)
+  dseq <- dd[1]
+  dseq[i1] <- as.Date(dd[i1])
+  while (i1 < length(dd)) {
+    while (sumvol < n & i1 < length(dd)) {
+      sumvol <- sumvol + ifelse(is.na(volq[i1]), 0, volq[i1])
+      i1 <- i1 + 1
+    }
+    sumvol <- 0
+    i2 <- i2 + 1
+    dseq[i2] <- dd[i1]
+  }
+  x[dseq,,drop=FALSE]
+}

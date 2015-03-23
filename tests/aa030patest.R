@@ -1,8 +1,8 @@
+require(aautil)
+aatopselect("test")
 require(aapa)
 require(testthat)
-supa.der
-
-aatopselect("test")
+#.supa.der()
 
 #######
 #USEAGE
@@ -15,11 +15,6 @@ if(FALSE) {
 ######
 #step 100 - range------------------------------
 xn100 <- aapafun[grep("^x0100",aapafun)]
-for(i in seq_along(xn100)) {
-  print(xn100[i])
-  print(i)
-  do.call(putstep,args=list(fun=xn100[i]))
-}
 #test data range, class, has zeros
 for(i in seq_along(xn100)) {
   print(xn100[i])
