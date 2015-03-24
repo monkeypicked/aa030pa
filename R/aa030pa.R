@@ -67,8 +67,13 @@ getmnem <- function(mydir = dern(...), ...) {
 #' @param ... passed to dern to construct mydir
 #' @examples getstep('NAME',n='000',typ='BDP')
 #' @export
-getstep <- function(mnem = strsplit(dir(mydir)[1], split = "\\.")[[1]][1], mydir = dern(...), ...) {
+getstep <- function(mnem = strsplit(dir(mydir)[1], split = "\\.")[[1]][1], mydir = dern(...), myclass=c("zoo","dt"), ...) {
+    myclass <- match.arg(myclass)
     load(paste0(mydir, mnem, ".RData"))
+    if(myclass=="dt") {
+      rownames(x)<-as.character(index(x))
+      x <- data.table(mattotab(coredata(x)))
+    }
     x
 }
 
@@ -159,7 +164,7 @@ x0100EFFP <- function() {
 #' @export
 #' @rdname f0100 
 x0100VIX <- function() {
-    getstep("VIX", n = "000", typ = "macro")
+    getstep("VIX", n = "000", type = "macro")
 }
 #' @export
 # select ranges inplace - zoo
