@@ -1,0 +1,45 @@
+---
+title: "aapa - data panel"
+author: "Max Probable"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{aapa - data panel}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+Package aapa operates on the output from companion package aabd, applying more-or-less standard operations in a more-or-less standard sequence, with options to customise at each step. The underlying pattern uses function names in a numerical sequence, such that if all operations starting with a given number are complete, then operations on the next number can proceed.  This defines processing 'chunks' which can be done in parallel, and 'stages' which need to be done serially.
+
+## Companion packages
+
+* aautil : contains **utility** functions used in these examples and internally in the package.
+* aabd : **download** is the package which generates the input panels, stored in RData
+* aate : **category** builds and manages industry trees and fractional industry classification
+
+## Input and output data
+
+* inputs are in root.global/BDH/derive-000, with one RData file per panel
+* inputs go to root.global/BDH/derive-001, similarly structured
+
+## Session
+
+In the following, it matters that aatopselect() is set before aapa is loaded, because the .onLoad sets global variables.  [This is not totally satisfactory.]
+
+```{r, eval = FALSE}
+require(aautil)
+aatopselect("test")
+require(aapa)
+require(testthat)
+deraapa()
+```
+
+After processing, access to the data is comparatively fast and scaleable
+```{r}
+library(aapa)
+aatopselect("test")
+cor(getstep("x0703redv"),us='c')
+```
+
+## Customisation
+Adding additional functions to the package, with appropriate names, causes them to automatically be executed within deraapa() at a 'step' which corresponds to the numeric part of the name. So for example a function beginning 'x07' will be run at the end, and can take dependencies on all preceding steps.
