@@ -77,6 +77,7 @@ getmnem <- function(mydir = dern(...), ...) {
 #' get a timeseries/cross-section panel or cross-section of reference data
 #' @param mnem filename without extension
 #' @param mydir directory
+#' @param myclass character flag for 'zoo' or 'dt'
 #' @param ... passed to dern to construct mydir
 #' @examples getstep('NAME',n='000',typ='BDP')
 #' @export
@@ -89,6 +90,68 @@ getstep <- function(mnem = strsplit(dir(mydir)[1], split = "\\.")[[1]][1], mydir
       x <- data.table(mattotab(coredata(x)))
     }
     x
+}
+
+#' Get panel for universe defined by su
+#'
+#' gets the panel corresponding to a securityuniverse, either applying locf or focb to the
+#' securityuniverse, then optionally extracting one date and applying focb to that.  The default
+#' is locf-focb, which means that the latest ex-ante universe identifies the cross-section, whose
+#' history is then extracted.  This is the correct usage for 'rolling ex-ante estimation' on a
+#' dynamic univers.
+#' @param su security universe, a data.table with columns date, bui
+#' @param mnem filename without extension
+#' @param mydir directory
+#' @param myclass 'zoo' or 'dt' is returned
+#' @param da reference date or datum for universe (this in incremented each time in a rolling estimation)
+#' @param la maximum lag to access as a positive number, so data returned starts at (da-lag)
+#' @param roll flag taking values 'locf' or 'focb', the former being correct for ex-ante estimation
+#' @param fixed logical flag indicating whether the universe is fixed as of da, or dynamic, defaults TRUE
+#' @param ... passed to dern to construct mydir
+#' @examples
+#' \dontrun{
+#' su <- getrdatv('jo','su')
+#' pa1 <- getpi(su)
+#' pa2 <- getpi(su,fix=F)
+#' pa3 <- getpi(su,da='2011-11-30')
+#' pa4 <- getpi(su,fix=F,da='2011-11-30')
+#' mean(is.na(pa2))-mean(is.na(pa1))#has more na because history screened out
+#' mean(is.na(pa4))-mean(is.na(pa3))#has more na because history screened out
+#' }
+#' @export
+#' @family accessor
+getpi <- function(su,
+                  mnem = "x0701mcap", 
+                  mydir = dern(...), 
+                  myclass=c("zoo","dt"),
+                  da=max(x[,date]),
+                  la=200,
+                  roll=TRUE,
+                  fixed=TRUE,
+                  ...) {
+  myclass <- match.arg(myclass)
+  stopifnot(is(su,'data.table') & all(c('bui','date')%in%colnames(su)))
+  x <- getstep(mnem,mydir,myclass='dt',...) #[this defines the calendar]
+  datevec <- rev(x[date<=da][,sort(unique(date),decreasing=TRUE)][1:min(la,.N)])
+  if(su[,mode(date)!='character']) su[,date:=as.character(date)]
+  #subset su, only x[,bui]
+  su <- setkey(su,bui)[x[,unique(bui)]][,ta:=1]
+  #interpolate su onto the basis of x, note the ta==1 which is then deleted
+  su1 <- unique(setkey(su,bui,date))[CJ(x[,unique(bui)],x[,unique(date)]),roll=roll][,list(bui,date,ta)][ta==1][,ta:=NULL]
+  #su1 <- unique(setkey(su,bui,date))[CJ(x[,unique(bui)],x[,unique(date)]),roll=roll,allow=TRUE][,list(bui,date,ta)][ta==1][,ta:=NULL]
+  #backpropagate su : if fixed=T take cartesian of bui on su(date==da) with the dates from x, otherwise window su
+  if(!(da%in%su1[,unique(date)])) browser()
+  if(fixed) {
+    su2 <- setnames(CJ(setkey(su1,date)[da,bui],datevec),c('bui','date'))
+  } else {
+    su2 <- setkey(su1,date)[datevec]
+  }
+  setkey(su2,bui,date)
+  stopifnot(nrow(unique(su2))==nrow(su2)) #unique
+  x <- setkey(x,bui,date)[su2]
+  if(myclass=="zoo") {
+    mz(tabtomat(data.frame(x)))
+  } else { x }
 }
 
 #' Put panel

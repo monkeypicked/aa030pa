@@ -86,3 +86,22 @@ for(i in seq_along(xnnnn)) {
 }
 
 
+#test getpi
+su <- getrdatv('jo','su')
+pa1 <- getpi(su)
+pa2 <- getpi(su,fix=F)
+pa3 <- getpi(su,da='2011-11-30')
+pa4 <- getpi(su,fix=F,da='2011-11-30')
+
+mean(is.na(pa2))-mean(is.na(pa1))#has more na because history screened out
+mean(is.na(pa4))-mean(is.na(pa3))#has more na because history screened out
+
+
+par(mfrow=c(2,2))
+imgzoo(pa1)
+imgzoo(pa2)
+imgzoo(pa3)
+imgzoo(pa4)
+
+par(mfrow=c(1,1))
+
