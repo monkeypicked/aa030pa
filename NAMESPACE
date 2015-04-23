@@ -2,6 +2,7 @@
 
 export(commonbui)
 export(deraapa)
+export(dersupa)
 export(f0100select)
 export(f0200zerotona)
 export(f0300outlier)
