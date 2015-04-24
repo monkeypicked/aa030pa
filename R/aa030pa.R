@@ -41,6 +41,7 @@ dersupa <- function() {
   supaw.g <<- cart(bui = data.table(bui = bui.local), da = data.table(date = daw.local))
 }
 
+
 #' Derive all panels
 #'
 #' Top-level function that calls the others
@@ -152,7 +153,9 @@ getpi <- function(su,
   su1 <- unique(setkey(su,bui,date))[CJ(x[,unique(bui)],x[,unique(date)]),roll=roll][,list(bui,date,ta)][ta==1][,ta:=NULL]
   #su1 <- unique(setkey(su,bui,date))[CJ(x[,unique(bui)],x[,unique(date)]),roll=roll,allow=TRUE][,list(bui,date,ta)][ta==1][,ta:=NULL]
   #backpropagate su : if fixed=T take cartesian of bui on su(date==da) with the dates from x, otherwise window su
-  if(!(da%in%su1[,unique(date)])) browser()
+  if(!(da%in%su1[,unique(date)])) { #take first date after su date
+    da <- su1[da<date,min(date)]
+  }
   if(fixed) {
     su2 <- setnames(CJ(setkey(su1,date)[da,bui],datevec),c('bui','date'))
   } else {
