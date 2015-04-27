@@ -1,6 +1,4 @@
 
-
-
 #' Date accessor
 #' 
 #' @export
@@ -96,12 +94,17 @@ getmnem <- function(mydir = dern(...), ...) {
 #' @export
 #' @family accessor
 getstep <- function(mnem = strsplit(dir(mydir)[1], split = "\\.")[[1]][1], mydir = dern(...), myclass=c("zoo","dt"), ...) {
-    myclass <- match.arg(myclass)
+    myclass <- match.arg(myclass)   
+    fnam <- ifelse(myclass=="dt",paste0(mydir, mnem, "_dt.RData"),paste0(mydir, mnem, ".RData"))
     load(paste0(mydir, mnem, ".RData"))
-    if(myclass=="dt") {
-      rownames(x)<-as.character(index(x))
-      x <- data.table(mattotab(coredata(x)))
-    }
+#     if(myclass=="dt") {
+#       load(paste0(mydir, mnem, ".RData"))
+#       rownames(x)<-as.character(index(x))
+#       x <- data.table(mattotab(coredata(x)))
+#       
+#     } else {
+#       load(paste0(mydir, mnem, ".RData"))
+#     }
     x
 }
 
@@ -111,9 +114,13 @@ getstep <- function(mnem = strsplit(dir(mydir)[1], split = "\\.")[[1]][1], mydir
 #' write to file a timeseries/cross-section panel or cross-section of reference data
 #' @export
 #' @family accessor
-putstep <- function(fun = "x01BTPTselect", mydir = dern(...), x = do.call(fun, args = list()), ...) {
+putstep <- function(fun = "x01BTPTselect", mydir = dern(...), x = do.call(fun, args = list()), ...,dt=FALSE) {
     stopifnot(exists(fun))
     save(x, file = paste0(mydir, fun, ".RData"))
+    if(dt) {
+      x <- data.table(mattotab(coredata(x)))
+      save(x,file = paste0(mydir, fun, "_dt.RData")) 
+    }
 }
 
 # commonbui - identifier accessor
@@ -730,13 +737,13 @@ x0603PLDV_TTU <- function() { #following the convention 03=from future
 #' @rdname f0700
 f0700return <- function(x) {
     # this is safe for both zoo and xts
-    as.zoo(retxts(as.xts(x)))[getdawpa(), , drop = FALSE]
+    xz(retxts(as.xts(x)))[getdawpa(), , drop = FALSE]
 }
 
 #' @export
 #' @rdname f0700
 f0700premium <- function(x) {
-    x1 <- as.zoo(retxts(as.xts(x)))[getdawpa(), , drop = FALSE]
+    x1 <- xz(retxts(as.xts(x)))[getdawpa(), , drop = FALSE]
     x2 <- getusst()[getdawpa(), , drop = FALSE]
     i <- as.Date(intersect(index(x1), index(x2)), origin = "1970-01-01")
     sweep(x1[i], FUN = "-", STAT = x2[i], MAR = 1)
@@ -883,13 +890,13 @@ x0702bopr <- function(...) {
 #' @export
 #' @rdname f0700 
 x0701redv <- function(...) {
-    as.zoo(retxts(as.xts(getstep("x0601PLDV_TTU"))))
+    xz(retxts(as.xts(getstep("x0601PLDV_TTU"))))
 }
 
 #' @export
 #' @rdname f0700 
 x0703redv <- function(...) {
-  as.zoo(retxts(as.xts(getstep("x0603PLDV_TTU"))))
+  xz(retxts(as.xts(getstep("x0603PLDV_TTU"))))
 }
 
 #' @export
