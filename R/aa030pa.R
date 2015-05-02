@@ -31,8 +31,10 @@ getbuipa <- function() {
 #' 
 #' @export
 dersupa <- function() {
-  bui.local <- buiindir(paste0(root.global, "BDH/RAW/BEST_TARGET_PRICE/TFU"))
-  da.local <- commonda(patt = "CUR_MKT_CAP_TFU.RData")
+  #bui.local <- buiindir(paste0(root.global, "BDH/RAW/BEST_TARGET_PRICE/TFU"))
+  #da.local <- commonda(patt = "CUR_MKT_CAP_TFU.RData")
+  bui.local <- getbuida()$bui
+  da.local <- getbuida()$da
   dd <- data.frame(derca())[, "date"]
   daw.local <- as.Date(intersect(da.local, dd), origin = as.Date("1970-01-01"))
   supad.g <<- cart(bui = data.table(bui = bui.local), da = data.table(date = da.local))
@@ -96,15 +98,15 @@ getmnem <- function(mydir = dern(...), ...) {
 getstep <- function(mnem = strsplit(dir(mydir)[1], split = "\\.")[[1]][1], mydir = dern(...), myclass=c("zoo","dt"), ...) {
     myclass <- match.arg(myclass)   
     fnam <- ifelse(myclass=="dt",paste0(mydir, mnem, "_dt.RData"),paste0(mydir, mnem, ".RData"))
-    load(paste0(mydir, mnem, ".RData"))
-#     if(myclass=="dt") {
-#       load(paste0(mydir, mnem, ".RData"))
-#       rownames(x)<-as.character(index(x))
-#       x <- data.table(mattotab(coredata(x)))
-#       
-#     } else {
-#       load(paste0(mydir, mnem, ".RData"))
-#     }
+    #load(paste0(mydir, mnem, ".RData"))
+    if(myclass=="dt") {
+      load(paste0(mydir, mnem, ".RData"))
+      rownames(x)<-as.character(index(x))
+      x <- data.table(mattotab(coredata(x)))
+      
+    } else {
+      load(paste0(mydir, mnem, ".RData"))
+    }
     x
 }
 
