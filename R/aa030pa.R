@@ -49,7 +49,7 @@ dersupa <- function() {
 #' @export
 #' @family toplevel
 deraapa <- function(token = c("^x0100", "^x0200", "^x03", "^x04", "^x05", "^x06", "^x07", "^x08")) {
-    for (j in seq_along(token)) {
+  for (j in seq_along(token)) {
         xn <- aapafun[grep(token[j], aapafun)]
         print(xn)
         for (i in seq_along(xn)) {
@@ -60,20 +60,6 @@ deraapa <- function(token = c("^x0100", "^x0200", "^x03", "^x04", "^x05", "^x06"
 }
 
 
-#' Get multiple reference data for all bui
-#'
-#' the root of all the filenames in the directory
-#' @param mydir directory
-#' @param mnem mnemonics (fields)
-#' @export
-#' @family toplevel
-getbdp <- function(mydir = dern(n = "000", typ = "BDP"), mnem = bdp1con()[, field]) {
-    # loadx <- function(mydir,mnem){{load(paste0(mydir,mnem,'.RData'));x}}
-    dt <- getstep(mnem = mnem[1], mydir = mydir)
-    if (1 < length(mnem)) 
-        for (i in 2:length(mnem)) dt <- dt[getstep(mnem = mnem[i], mydir = mydir)]
-    dt
-}
 
 #' Get mnemonics
 #'
@@ -85,30 +71,6 @@ getmnem <- function(mydir = dern(...), ...) {
     unlist(lapply(lapply(lapply(dir(mydir), strsplit, split = "\\."), "[[", 1), "[", 1))
 }
 
-#' Get panel
-#'
-#' get a timeseries/cross-section panel or cross-section of reference data
-#' @param mnem filename without extension
-#' @param mydir directory
-#' @param myclass character flag for 'zoo' or 'dt'
-#' @param ... passed to dern to construct mydir
-#' @examples getstep('NAME',n='000',typ='BDP')
-#' @export
-#' @family accessor
-getstep <- function(mnem = strsplit(dir(mydir)[1], split = "\\.")[[1]][1], mydir = dern(...), myclass=c("zoo","dt"), ...) {
-    myclass <- match.arg(myclass)   
-    fnam <- ifelse(myclass=="dt",paste0(mydir, mnem, "_dt.RData"),paste0(mydir, mnem, ".RData"))
-    #load(paste0(mydir, mnem, ".RData"))
-    if(myclass=="dt") {
-      load(paste0(mydir, mnem, ".RData"))
-      rownames(x)<-as.character(index(x))
-      x <- data.table(mattotab(coredata(x)))
-      
-    } else {
-      load(paste0(mydir, mnem, ".RData"))
-    }
-    x
-}
 
 
 #' Put panel
