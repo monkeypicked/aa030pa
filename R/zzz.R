@@ -5,7 +5,9 @@
 #     daw.local <<- as.Date(intersect(da.local, dd), origin = as.Date("1970-01-01"))
 #     supad.g <<- cart(bui = data.table(bui = bui.local), da = data.table(date = da.local))
 #     supaw.g <<- cart(bui = data.table(bui = bui.local), da = data.table(date = daw.local))
-    dersupa()
+
+#this commented out 2015-10-23 to enable remote deployment
+#    dersupa()
     aapaenv <<- environment(x0100BTP_TFU)  #this is the package environment - could be done better?
     aapafun <<- ls(aapaenv)
 } 
