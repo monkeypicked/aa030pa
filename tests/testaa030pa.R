@@ -1,5 +1,5 @@
 require(aautil)
-aatopselect("test")
+aatopselect("prod")
 require(aapa)
 require(testthat)
 #.supa.der()

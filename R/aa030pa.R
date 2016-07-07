@@ -912,3 +912,16 @@ resampvix <- function(x=getstep('VIX',myd=dern(ty='m',n='000')),volq=lastqtile(x
   }
   x[dseq,,drop=FALSE]
 }
+
+#place all panels in rd - this done 2016-07-07 but not sure this is the way to go
+# putpa <- function(token = c("^x07")) {
+#   for (j in seq_along(token)) {
+#     xn <- aapafun[grep(token[j], aapafun)]
+#     print(xn)
+#     for (i in seq_along(xn)) {
+#       x <- getstep(mnem=xn[i],mydir=dern(n='001'))
+#       print(xn[i])
+#       putrdatv(x=x,ty=xn[i])
+#     }
+#   }
+# }
